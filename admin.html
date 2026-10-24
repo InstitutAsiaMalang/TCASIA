@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin Trial Class – Kampus Asia</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#14213d;--gold:#f2b705;--red:#e63946;--green:#1b9a5b;--bg:#f6f7fb;--text:#1d2433;--muted:#667085;--line:#e1e5ee}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--navy);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:17px}header b span{color:var(--gold)}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 18px rgba(20,33,61,.08);margin-bottom:18px}
+h2{margin:0 0 14px;font-size:17px}
+label{display:block;font-weight:600;font-size:13px;margin:0 0 5px}
+input{width:100%;padding:11px 12px;font:inherit;font-size:15px;border:1.5px solid var(--line);border-radius:10px;outline:none}
+input:focus{border-color:var(--navy)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+button{border:0;padding:10px 16px;font:inherit;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;background:var(--red);color:#fff}
+button.s{background:#eef0f6;color:var(--navy)}
+button.n{background:var(--navy)}
+button:disabled{opacity:.6}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:800;background:#eef0f6;color:var(--navy)}
+.badge.buka{background:#dcf5e8;color:var(--green)}
+.badge.penuh,.badge.ditutup,.badge.waktu_habis{background:#fde6e8;color:var(--red)}
+.badge.belum_buka{background:#fff3cc;color:#8a6500}
+.bar{height:10px;background:#eef0f6;border-radius:99px;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:var(--gold)}
+.muted{color:var(--muted);font-size:13px}
+.msg{font-size:13.5px;margin-top:10px;color:var(--red)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+#app{display:none}
+</style>
+</head>
+<body>
+<header><b>Admin <span>Trial Class</span></b><button class="s" id="out" style="display:none">Keluar</button></header>
+<main>
+  <section class="card" id="login" style="max-width:360px;margin:40px auto">
+    <h2>Masuk Admin</h2>
+    <label for="pin">PIN</label>
+    <input id="pin" type="password" autocomplete="current-password">
+    <div class="row"><button class="n" id="go">Masuk</button></div>
+    <div class="msg" id="lmsg"></div>
+  </section>
+
+  <div id="app">
+    <section class="card" id="aktif"></section>
+
+    <section class="card">
+      <h2 id="fTitle">Buat sesi baru</h2>
+      <div class="g">
+        <div><label>Nama sesi</label><input id="fNama" placeholder="Sesi 1"></div>
+        <div><label>Pendaftaran dibuka</label><input id="fBuka" type="datetime-local"></div>
+        <div><label>Pendaftaran ditutup</label><input id="fTutup" type="datetime-local"></div>
+        <div><label>Kuota peserta</label><input id="fKuota" type="number" min="1" placeholder="50"></div>
+      </div>
+      <div class="muted" id="fHint">Sesi baru otomatis menjadi sesi aktif dan menggantikan sesi sebelumnya. Data sesi lama tetap tersimpan di laporan.</div>
+      <div class="row"><button id="fSave">Buat sesi</button><button class="s" id="fCancel" style="display:none">Batal edit</button></div>
+      <div class="msg" id="fmsg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Laporan per sesi</h2>
+      <div class="tw"><table id="tbl"></table></div>
+      <div class="row"><button class="s" id="dlAll">Unduh semua sesi (CSV)</button></div>
+    </section>
+
+    <section class="card" id="detail" style="display:none">
+      <h2 id="dTitle"></h2>
+      <div class="tw"><table id="dTbl"></table></div>
+      <div class="row"><button class="n" id="dl">Unduh CSV sesi ini</button></div>
+    </section>
+  </div>
+</main>
+
+<script>
+// ====== PENGATURAN ======
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwz-aH8TJ3RW-_aE4ZEUeqvKcFM8d993jN6L8aJTcJDnGY0kkh1Oc6kNy0GO1S-_ssI/exec";   // sama dengan URL di index.html
+// ========================
+
+const $ = id => document.getElementById(id);
+const fmt = ms => new Date(ms).toLocaleString('id-ID', {dateStyle:'medium', timeStyle:'short'});
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LABEL = {buka:'Dibuka', penuh:'Penuh', ditutup:'Ditutup manual', waktu_habis:'Waktu habis', belum_buka:'Belum dibuka', selesai:'Selesai'};
+let pin = sessionStorage.getItem('pin') || '', data = null, editId = null, detailId = null, detailRows = [];
+
+async function api(action, extra){
+  const r = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action, pin, ...extra }) });
+  return r.json();
+}
+const toInput = ms => new Date(ms - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+async function refresh(){
+  const r = await api('ringkasan');
+  if (!r.ok) { sessionStorage.removeItem('pin'); pin=''; $('login').style.display='block'; $('app').style.display='none'; $('out').style.display='none'; $('lmsg').textContent = r.error||''; return false; }
+  data = r; $('login').style.display='none'; $('app').style.display='block'; $('out').style.display='inline-block';
+  render(); return true;
+}
+
+function render(){
+  const a = data.sesi.find(s => s.id === data.aktifId);
+  if (!a) $('aktif').innerHTML = '<h2>Sesi aktif</h2><p class="muted">Belum ada sesi. Buat sesi pertama di bawah.</p>';
+  else {
+    const pct = Math.min(100, Math.round(a.terisi / a.kuota * 100));
+    $('aktif').innerHTML = `<h2>Sesi aktif: ${esc(a.nama)} <span class="badge ${a.state}">${LABEL[a.state]}</span></h2>
+      <div><b style="font-size:26px">${a.terisi}</b> <span class="muted">/ ${a.kuota} peserta</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="muted">Buka: ${fmt(a.buka)} &nbsp;•&nbsp; Tutup: ${fmt(a.tutup)}</div>
+      <div class="row"><button class="s" onclick="edit(${a.id})">Edit pengaturan</button>
+        <button class="s" onclick="toggle(${a.id})">${a.manual ? 'Buka kembali' : 'Tutup sekarang'}</button>
+        <button class="n" onclick="lihat(${a.id})">Lihat peserta</button></div>`;
+  }
+  const rows = [...data.sesi].reverse().map(s => {
+    const st = s.id === data.aktifId ? s.state : 'selesai';
+    return `<tr><td><b>${esc(s.nama)}</b></td><td>${fmt(s.buka)} – ${fmt(s.tutup)}</td><td>${s.terisi}/${s.kuota}</td>
+      <td><span class="badge ${st}">${LABEL[st]}</span></td><td><button class="s" onclick="lihat(${s.id})">Lihat</button></td></tr>`;
+  }).join('');
+  $('tbl').innerHTML = `<tr><th>Sesi</th><th>Periode</th><th>Terisi</th><th>Status</th><th></th></tr>` + (rows || '<tr><td colspan="5" class="muted">Belum ada sesi.</td></tr>');
+}
+
+function edit(id){
+  const s = data.sesi.find(x => x.id === id); editId = id;
+  $('fTitle').textContent = 'Edit ' + s.nama; $('fNama').value = s.nama; $('fBuka').value = toInput(s.buka);
+  $('fTutup').value = toInput(s.tutup); $('fKuota').value = s.kuota; $('fSave').textContent = 'Simpan perubahan';
+  $('fCancel').style.display = 'inline-block'; $('fHint').style.display = 'none'; scrollTo({top:document.body.scrollHeight/4, behavior:'smooth'});
+}
+function resetForm(){
+  editId = null; $('fTitle').textContent = 'Buat sesi baru'; ['fNama','fBuka','fTutup','fKuota'].forEach(i => $(i).value='');
+  $('fNama').placeholder = 'Sesi ' + ((data && data.sesi.length || 0) + 1); $('fSave').textContent = 'Buat sesi';
+  $('fCancel').style.display = 'none'; $('fHint').style.display = 'block'; $('fmsg').textContent = '';
+}
+$('fCancel').onclick = resetForm;
+$('fSave').onclick = async () => {
+  const f = { nama: $('fNama').value.trim() || $('fNama').placeholder, buka: new Date($('fBuka').value).getTime(),
+    tutup: new Date($('fTutup').value).getTime(), kuota: $('fKuota').value };
+  if (!editId && data.aktifId && !confirm('Membuat sesi baru akan menutup sesi aktif saat ini. Lanjut?')) return;
+  const cur = editId && data.sesi.find(s => s.id === editId);
+  $('fSave').disabled = true;
+  try {
+    const r = editId ? await api('ubah', { ...f, id: editId, manual: cur.manual }) : await api('buat', f);
+    if (!r.ok) { $('fmsg').textContent = r.error; return; }
+    await refresh(); resetForm(); $('fmsg').textContent = '';
+  } catch (e) { $('fmsg').textContent = 'Gagal terhubung ke server.'; }
+  finally { $('fSave').disabled = false; }
+};
+async function toggle(id){
+  const s = data.sesi.find(x => x.id === id);
+  if (!s.manual && !confirm('Tutup pendaftaran sekarang?')) return;
+  await api('ubah', { id, nama:s.nama, buka:s.buka, tutup:s.tutup, kuota:s.kuota, manual:!s.manual });
+  refresh();
+}
+
+async function lihat(id){
+  const s = data.sesi.find(x => x.id === id); detailId = id;
+  const r = await api('peserta', { id }); detailRows = r.rows || [];
+  $('dTitle').textContent = `${s.nama} – ${detailRows.length} peserta`;
+  $('dTbl').innerHTML = `<tr><th>#</th><th>Waktu</th><th>Nama</th><th>Sekolah</th><th>Kota</th><th>Kelas</th><th>WA</th></tr>` +
+    (detailRows.map((p,i) => `<tr><td>${i+1}</td><td>${fmt(p.waktu)}</td><td>${esc(p.nama)}</td><td>${esc(p.sekolah)}</td><td>${esc(p.kota)}</td><td>${esc(p.kelas)}</td><td>${esc(p.wa)}</td></tr>`).join('')
+      || '<tr><td colspan="7" class="muted">Belum ada peserta.</td></tr>');
+  $('detail').style.display = 'block'; $('detail').scrollIntoView({behavior:'smooth'});
+}
+function csv(rows, name){
+  const q = v => `"${String(v).replace(/"/g,'""')}"`;
+  const lines = [['Sesi','Waktu','Nama Lengkap','Sekolah','Kota','Kelas','Nomor WA']].concat(
+    rows.map(p => [p.sesi, new Date(p.waktu).toLocaleString('id-ID'), p.nama, p.sekolah, p.kota, p.kelas, '="'+p.wa+'"']));
+  const blob = new Blob(['\ufeff' + lines.map(l => l.map(q).join(',')).join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+$('dl').onclick = () => { const s = data.sesi.find(x => x.id === detailId); csv(detailRows, `peserta-${s.nama.replace(/\s+/g,'-').toLowerCase()}.csv`); };
+$('dlAll').onclick = async () => { const r = await api('peserta', {}); csv(r.rows || [], 'peserta-semua-sesi.csv'); };
+
+$('go').onclick = async () => {
+  pin = $('pin').value; $('lmsg').textContent = '';
+  if (!APPS_SCRIPT_URL) { $('lmsg').textContent = 'APPS_SCRIPT_URL belum diisi.'; return; }
+  try { if (await refresh()) sessionStorage.setItem('pin', pin); } catch (e) { $('lmsg').textContent = 'Gagal terhubung ke server.'; }
+};
+$('pin').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
+$('out').onclick = () => { sessionStorage.removeItem('pin'); location.reload(); };
+if (pin && APPS_SCRIPT_URL) refresh().then(() => resetForm()).catch(() => {});
+</script>
+</body>
+</html>

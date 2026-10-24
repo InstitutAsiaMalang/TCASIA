@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trial Class Kampus Asia – Konfirmasi Kehadiran</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#14213d;--gold:#f2b705;--red:#e63946;--bg:#f6f7fb;--text:#1d2433;--muted:#667085;--line:#e1e5ee}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{background:var(--navy);color:#fff;padding:34px 20px 70px;text-align:center}
+.tag{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:12px;letter-spacing:.06em;padding:5px 12px;border-radius:99px}
+h1{margin:14px 0 8px;font-size:clamp(26px,6vw,38px);line-height:1.15;font-weight:800}
+h1 span{color:var(--gold)}
+.hero p{margin:0 auto;max-width:440px;opacity:.85;font-size:15px}
+.wrap{max-width:480px;margin:-44px auto 40px;padding:0 16px}
+.card{background:#fff;border-radius:18px;padding:24px 20px;box-shadow:0 8px 28px rgba(20,33,61,.12);display:none}
+.info{background:#fff8e1;border-left:4px solid var(--gold);padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:18px}
+label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
+.f{margin-bottom:16px}
+input{width:100%;padding:13px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--text);outline:none;transition:.15s}
+input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(20,33,61,.1)}
+.err{color:var(--red);font-size:12.5px;margin-top:4px;display:none}
+.bad input{border-color:var(--red)}
+.bad .err{display:block}
+button{width:100%;border:0;padding:15px;font:inherit;font-weight:800;font-size:16px;border-radius:12px;background:var(--red);color:#fff;cursor:pointer}
+button:hover{filter:brightness(1.07)}
+button:disabled{opacity:.6;cursor:wait}
+.note{text-align:center;color:var(--muted);font-size:12.5px;margin-top:12px}
+.hp{position:absolute;left:-9999px}
+.c{text-align:center;padding:10px 0}
+.ic{width:64px;height:64px;border-radius:50%;background:var(--gold);color:var(--navy);font-size:32px;font-weight:800;display:grid;place-items:center;margin:0 auto 14px}
+.ic.x{background:var(--navy);color:var(--gold)}
+.c h2{margin:0 0 8px;font-size:22px}
+.c p{margin:0;color:var(--muted);font-size:15px}
+.lnk{background:none;color:var(--navy);width:auto;padding:0;margin-top:18px;font-weight:600;font-size:14px;text-decoration:underline}
+.fail{display:none;color:var(--red);font-size:13.5px;text-align:center;margin-top:12px}
+</style>
+</head>
+<body>
+<header class="hero">
+  <span class="tag">TRIAL CLASS GRATIS</span>
+  <h1>Cobain Kuliah di<br><span>Kampus Asia</span> dulu!</h1>
+  <p>Rasain langsung serunya kelas kami. Isi data di bawah buat amankan kursimu.</p>
+</header>
+
+<main class="wrap">
+  <section class="card c" id="loading"><p>Memuat...</p></section>
+
+  <section class="card" id="formCard">
+    <div class="info" id="info"></div>
+    <form id="rsvp" novalidate>
+      <div class="f" data-f="nama"><label for="nama">Nama Lengkap</label>
+        <input id="nama" name="nama" autocomplete="name" placeholder="Contoh: Aisyah Putri">
+        <div class="err">Nama lengkap wajib diisi.</div></div>
+      <div class="f" data-f="sekolah"><label for="sekolah">Sekolah</label>
+        <input id="sekolah" name="sekolah" placeholder="Contoh: SMAN 1 Malang">
+        <div class="err">Nama sekolah wajib diisi.</div></div>
+      <div class="f" data-f="kota"><label for="kota">Kota</label>
+        <input id="kota" name="kota" autocomplete="address-level2" placeholder="Contoh: Malang">
+        <div class="err">Kota wajib diisi.</div></div>
+      <div class="f" data-f="kelas"><label for="kelas">Kelas</label>
+        <input id="kelas" name="kelas" placeholder="Contoh: XII IPA 2">
+        <div class="err">Kelas wajib diisi.</div></div>
+      <div class="f" data-f="wa"><label for="wa">Nomor WA</label>
+        <input id="wa" name="wa" type="tel" inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx">
+        <div class="err">Masukkan nomor WA yang valid (contoh: 081234567890).</div></div>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" id="btn">Konfirmasi Kehadiran</button>
+      <div class="fail" id="fail"></div>
+      <div class="note">Data hanya dipakai untuk keperluan acara trial class.</div>
+    </form>
+  </section>
+
+  <section class="card c" id="okCard">
+    <div class="ic">✓</div>
+    <h2>Kehadiranmu terkonfirmasi!</h2>
+    <p>Terima kasih. Tim Kampus Asia akan menghubungi kamu lewat WhatsApp untuk detail acara.</p>
+  </section>
+
+  <section class="card c" id="closedCard">
+    <div class="ic x" id="cIc">!</div>
+    <h2 id="cTitle"></h2>
+    <p id="cMsg"></p>
+    <button class="lnk" id="retry" type="button" style="display:none">Coba lagi</button>
+  </section>
+</main>
+
+<script>
+// ====== PENGATURAN ======
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwz-aH8TJ3RW-_aE4ZEUeqvKcFM8d993jN6L8aJTcJDnGY0kkh1Oc6kNy0GO1S-_ssI/exec";   // tempel URL Web App Google Apps Script
+// ========================
+
+const $ = id => document.getElementById(id);
+const form = $('rsvp');
+const fmt = ms => new Date(ms).toLocaleString('id-ID', {dateStyle:'full', timeStyle:'short'});
+function show(id){ ['loading','formCard','okCard','closedCard'].forEach(x => $(x).style.display = x===id ? 'block' : 'none'); }
+function closed(title, msg, retry){
+  $('cTitle').textContent = title; $('cMsg').textContent = msg;
+  $('retry').style.display = retry ? 'inline' : 'none'; show('closedCard');
+}
+
+async function load(){
+  show('loading');
+  if (!APPS_SCRIPT_URL) return closed('Belum dikonfigurasi', 'Admin belum mengisi APPS_SCRIPT_URL.');
+  try {
+    const s = await (await fetch(APPS_SCRIPT_URL)).json();
+    if (s.state === 'buka') {
+      $('info').textContent = `🎟️ ${s.nama} • Sisa ${s.sisa} kursi • Ditutup ${fmt(s.tutup)}`;
+      show('formCard');
+    } else if (s.state === 'belum_buka') closed('Pendaftaran belum dibuka', `${s.nama} dibuka ${fmt(s.buka)}.`);
+    else if (s.state === 'penuh') closed('Kuota sudah penuh', 'Terima kasih antusiasmu! Pantau info sesi berikutnya ya.');
+    else if (s.state === 'tidak_ada') closed('Belum ada sesi', 'Pantau terus info trial class berikutnya.');
+    else closed('Pendaftaran ditutup', 'Terima kasih antusiasmu! Pantau info sesi berikutnya ya.');
+  } catch (e) { closed('Gagal memuat', 'Cek koneksi internet kamu.', true); }
+}
+$('retry').onclick = load;
+
+function normWA(v){ let n = v.replace(/\D/g,''); if (n.startsWith('0')) n = '62' + n.slice(1); return n; }
+const rules = {
+  nama:v=>v.trim().length>=3, sekolah:v=>v.trim().length>=3, kota:v=>v.trim().length>=2,
+  kelas:v=>v.trim().length>=1, wa:v=>/^628\d{7,11}$/.test(normWA(v))
+};
+function check(){
+  let ok = true;
+  for (const k in rules){
+    const good = rules[k](form[k].value);
+    form.querySelector(`[data-f=${k}]`).classList.toggle('bad', !good);
+    if (!good) ok = false;
+  }
+  return ok;
+}
+form.addEventListener('input', e => { const f = e.target.closest('[data-f]'); if (f) f.classList.remove('bad'); });
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const fail = $('fail'); fail.style.display = 'none';
+  if (!check()) { const b = form.querySelector('.bad input'); if (b) b.focus(); return; }
+  if (form.website.value) return;
+  const body = JSON.stringify({ action:'daftar', nama:form.nama.value.trim(), sekolah:form.sekolah.value.trim(),
+    kota:form.kota.value.trim(), kelas:form.kelas.value.trim(), wa:normWA(form.wa.value) });
+  const btn = $('btn'); btn.disabled = true; btn.textContent = 'Mengirim...';
+  try {
+    const r = await (await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body })).json();
+    if (r.ok) { form.reset(); show('okCard'); window.scrollTo({top:0, behavior:'smooth'}); }
+    else if (r.state) load();
+    else { fail.textContent = r.error || 'Gagal mengirim.'; fail.style.display = 'block'; }
+  } catch (err) { fail.textContent = 'Gagal mengirim. Cek koneksi lalu coba lagi.'; fail.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = 'Konfirmasi Kehadiran'; }
+});
+load();
+</script>
+</body>
+</html>
