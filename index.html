@@ -89,6 +89,7 @@ button:disabled{opacity:.6;cursor:wait}
     <a class="wa" id="wa" href="https://wa.me/6285735462803?text=Halo%2C%20saya%20ingin%20menanyakan%20kursi%20Trial%20Class%20Kampus%20Asia" target="_blank" rel="noopener">Chat WhatsApp Contact Person</a>
     <button class="lnk" id="retry" type="button" style="display:none">Coba lagi</button>
   </section>
+<div class="note" id="dbg" style="margin:0 0 30px"></div>
 </main>
 
 <script>
@@ -112,6 +113,7 @@ async function load(){
   if (!APPS_SCRIPT_URL) return closed('Belum dikonfigurasi', 'Admin belum mengisi APPS_SCRIPT_URL.');
   try {
     const s = await (await fetch(APPS_SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' })).json();
+    $('dbg').textContent = 'v3 • status server: ' + s.state;
     if (s.state === 'buka') {
       $('info').textContent = `🎟️ ${s.nama} • Sisa ${s.sisa} kursi • Ditutup ${fmt(s.tutup)}`;
       show('formCard');
@@ -119,7 +121,7 @@ async function load(){
     else if (s.state === 'penuh') closed('Kuota sudah penuh', 'Maaf, kuota pendaftaran trial class sudah terpenuhi.', false, true);
     else if (s.state === 'tidak_ada') closed('Belum ada sesi', 'Pantau terus info trial class berikutnya.');
     else closed('Pendaftaran ditutup', 'Maaf, waktu pendaftaran trial class sudah berakhir.', false, true);
-  } catch (e) { closed('Gagal memuat', 'Cek koneksi internet kamu.', true); }
+  } catch (e) { $('dbg').textContent = 'v3 • error: ' + e.message; closed('Gagal memuat', 'Cek koneksi internet kamu.', true); }
 }
 $('retry').onclick = load;
 
