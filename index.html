@@ -35,6 +35,8 @@ button:disabled{opacity:.6;cursor:wait}
 .c h2{margin:0 0 8px;font-size:22px}
 .c p{margin:0;color:var(--muted);font-size:15px}
 .lnk{background:none;color:var(--navy);width:auto;padding:0;margin-top:18px;font-weight:600;font-size:14px;text-decoration:underline}
+.wa{display:none;margin-top:18px;background:#25d366;color:#fff;font-weight:800;font-size:15px;padding:13px 16px;border-radius:12px;text-decoration:none}
+.cp{display:none;margin-top:14px;background:#fff8e1;border-left:4px solid var(--gold);padding:12px;border-radius:8px;font-size:14px;text-align:left}
 .fail{display:none;color:var(--red);font-size:13.5px;text-align:center;margin-top:12px}
 </style>
 </head>
@@ -83,22 +85,26 @@ button:disabled{opacity:.6;cursor:wait}
     <div class="ic x" id="cIc">!</div>
     <h2 id="cTitle"></h2>
     <p id="cMsg"></p>
+    <div class="cp" id="cp">Silakan hubungi <b>Contact Person: 085735462803</b> untuk konfirmasi apakah masih ada kursi tersedia.</div>
+    <a class="wa" id="wa" href="https://wa.me/6285735462803?text=Halo%2C%20saya%20ingin%20menanyakan%20kursi%20Trial%20Class%20Kampus%20Asia" target="_blank" rel="noopener">Chat WhatsApp Contact Person</a>
     <button class="lnk" id="retry" type="button" style="display:none">Coba lagi</button>
   </section>
 </main>
 
 <script>
 // ====== PENGATURAN ======
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyP49KHZ6qYphLN5Du_AlS5JKq9lbFc8344XWqHO_rOnKoi4z-tuRO9xw-HWirjOAsuJg/exec";   // tempel URL Web App Google Apps Script
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwz-aH8TJ3RW-_aE4ZEUeqvKcFM8d993jN6L8aJTcJDnGY0kkh1Oc6kNy0GO1S-_ssI/exec";   // tempel URL Web App Google Apps Script
 // ========================
 
 const $ = id => document.getElementById(id);
 const form = $('rsvp');
 const fmt = ms => new Date(ms).toLocaleString('id-ID', {dateStyle:'full', timeStyle:'short'});
 function show(id){ ['loading','formCard','okCard','closedCard'].forEach(x => $(x).style.display = x===id ? 'block' : 'none'); }
-function closed(title, msg, retry){
+function closed(title, msg, retry, contact){
   $('cTitle').textContent = title; $('cMsg').textContent = msg;
-  $('retry').style.display = retry ? 'inline' : 'none'; show('closedCard');
+  $('retry').style.display = retry ? 'inline' : 'none';
+  $('cp').style.display = contact ? 'block' : 'none'; $('wa').style.display = contact ? 'inline-block' : 'none';
+  show('closedCard');
 }
 
 async function load(){
@@ -110,9 +116,9 @@ async function load(){
       $('info').textContent = `🎟️ ${s.nama} • Sisa ${s.sisa} kursi • Ditutup ${fmt(s.tutup)}`;
       show('formCard');
     } else if (s.state === 'belum_buka') closed('Pendaftaran belum dibuka', `${s.nama} dibuka ${fmt(s.buka)}.`);
-    else if (s.state === 'penuh') closed('Kuota sudah penuh', 'Terima kasih antusiasmu! Pantau info sesi berikutnya ya.');
+    else if (s.state === 'penuh') closed('Kuota sudah penuh', 'Maaf, kuota pendaftaran trial class sudah terpenuhi.', false, true);
     else if (s.state === 'tidak_ada') closed('Belum ada sesi', 'Pantau terus info trial class berikutnya.');
-    else closed('Pendaftaran ditutup', 'Terima kasih antusiasmu! Pantau info sesi berikutnya ya.');
+    else closed('Pendaftaran ditutup', 'Maaf, waktu pendaftaran trial class sudah berakhir.', false, true);
   } catch (e) { closed('Gagal memuat', 'Cek koneksi internet kamu.', true); }
 }
 $('retry').onclick = load;
