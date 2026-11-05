@@ -114,6 +114,7 @@ async function load(){
   try {
     const s = await (await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ action:'status' }) })).json();
     $('dbg').textContent = 'halaman v4 • server ' + (s.v || 'lama') + ' • status: ' + s.state;
+    if (!s.state) throw new Error('Server belum diperbarui (deploy versi lama)');
     if (s.state === 'buka') {
       $('info').textContent = `🎟️ ${s.nama} • Sisa ${s.sisa} kursi • Ditutup ${fmt(s.tutup)}`;
       show('formCard');
