@@ -112,8 +112,8 @@ async function load(){
   show('loading');
   if (!APPS_SCRIPT_URL) return closed('Belum dikonfigurasi', 'Admin belum mengisi APPS_SCRIPT_URL.');
   try {
-    const s = await (await fetch(APPS_SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' })).json();
-    $('dbg').textContent = 'v3 • status server: ' + s.state;
+    const s = await (await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ action:'status' }) })).json();
+    $('dbg').textContent = 'halaman v4 • server ' + (s.v || 'lama') + ' • status: ' + s.state;
     if (s.state === 'buka') {
       $('info').textContent = `🎟️ ${s.nama} • Sisa ${s.sisa} kursi • Ditutup ${fmt(s.tutup)}`;
       show('formCard');
