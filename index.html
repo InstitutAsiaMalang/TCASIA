@@ -111,7 +111,7 @@ async function load(){
   show('loading');
   if (!APPS_SCRIPT_URL) return closed('Belum dikonfigurasi', 'Admin belum mengisi APPS_SCRIPT_URL.');
   try {
-    const s = await (await fetch(APPS_SCRIPT_URL)).json();
+    const s = await (await fetch(APPS_SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' })).json();
     if (s.state === 'buka') {
       $('info').textContent = `🎟️ ${s.nama} • Sisa ${s.sisa} kursi • Ditutup ${fmt(s.tutup)}`;
       show('formCard');
