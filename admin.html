@@ -162,15 +162,15 @@ async function lihat(id){
   const s = data.sesi.find(x => x.id === id); detailId = id;
   const r = await api('peserta', { id }); detailRows = r.rows || [];
   $('dTitle').textContent = `${s.nama} – ${detailRows.length} peserta`;
-  $('dTbl').innerHTML = `<tr><th>#</th><th>Waktu</th><th>Nama</th><th>Sekolah</th><th>Kota</th><th>Kelas</th><th>WA</th><th>Transportasi</th></tr>` +
-    (detailRows.map((p,i) => `<tr><td>${i+1}</td><td>${fmt(p.waktu)}</td><td>${esc(p.nama)}</td><td>${esc(p.sekolah)}</td><td>${esc(p.kota)}</td><td>${esc(p.kelas)}</td><td>${esc(p.wa)}</td><td>${esc(p.transport)}</td></tr>`).join('')
-      || '<tr><td colspan="8" class="muted">Belum ada peserta.</td></tr>');
+  $('dTbl').innerHTML = `<tr><th>#</th><th>Waktu</th><th>Nama</th><th>Sekolah</th><th>Kota</th><th>Kelas</th><th>WA</th><th>Transportasi</th><th>Prodi</th></tr>` +
+    (detailRows.map((p,i) => `<tr><td>${i+1}</td><td>${fmt(p.waktu)}</td><td>${esc(p.nama)}</td><td>${esc(p.sekolah)}</td><td>${esc(p.kota)}</td><td>${esc(p.kelas)}</td><td>${esc(p.wa)}</td><td>${esc(p.transport)}</td><td>${esc(p.prodi)}</td></tr>`).join('')
+      || '<tr><td colspan="9" class="muted">Belum ada peserta.</td></tr>');
   $('detail').style.display = 'block'; $('detail').scrollIntoView({behavior:'smooth'});
 }
 function csv(rows, name){
   const q = v => `"${String(v).replace(/"/g,'""')}"`;
-  const lines = [['Sesi','Waktu','Nama Lengkap','Sekolah','Kota','Kelas','Nomor WA','Transportasi']].concat(
-    rows.map(p => [p.sesi, new Date(p.waktu).toLocaleString('id-ID'), p.nama, p.sekolah, p.kota, p.kelas, '="'+p.wa+'"', p.transport]));
+  const lines = [['Sesi','Waktu','Nama Lengkap','Sekolah','Kota','Kelas','Nomor WA','Transportasi','Prodi']].concat(
+    rows.map(p => [p.sesi, new Date(p.waktu).toLocaleString('id-ID'), p.nama, p.sekolah, p.kota, p.kelas, '="'+p.wa+'"', p.transport, p.prodi]));
   const blob = new Blob(['\ufeff' + lines.map(l => l.map(q).join(',')).join('\n')], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
 }
