@@ -19,10 +19,11 @@ h1 span{color:var(--gold)}
 .info{background:#fff8e1;border-left:4px solid var(--gold);padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:18px}
 label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
 .f{margin-bottom:16px}
-input{width:100%;padding:13px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--text);outline:none;transition:.15s}
-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(20,33,61,.1)}
+input,select{width:100%;padding:13px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--text);outline:none;transition:.15s}
+input:focus,select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(20,33,61,.1)}
 .err{color:var(--red);font-size:12.5px;margin-top:4px;display:none}
-.bad input{border-color:var(--red)}
+.bad input,.bad select{border-color:var(--red)}
+select{appearance:none;-webkit-appearance:none;padding-right:42px;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%2314213d' stroke-width='2' fill='none'/></svg>") no-repeat right 16px center;cursor:pointer}
 .bad .err{display:block}
 button{width:100%;border:0;padding:15px;font:inherit;font-weight:800;font-size:16px;border-radius:12px;background:var(--red);color:#fff;cursor:pointer}
 button:hover{filter:brightness(1.07)}
@@ -75,10 +76,21 @@ button:disabled{opacity:.6;cursor:wait}
       <div class="f" data-f="wa"><label for="wa">Nomor WA</label>
         <input id="wa" name="wa" type="tel" inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx">
         <div class="err">Masukkan nomor WA yang valid (contoh: 081234567890).</div></div>
-      <div class="f" data-f="transport"><label>Mau ke kampus Asia dengan cara?</label>
+      <div class="f" data-f="prodi"><label for="prodi">Pilih prodi / jurusan yang kamu minati</label>
+        <select id="prodi" name="prodi">
+          <option value="">Pilih jawaban</option>
+          <option>Teknik Informatika (TI)</option>
+          <option>Sistem Komputer (SK)</option>
+          <option>Desain Komunikasi Visual (DKV)</option>
+          <option>Akuntansi (AK)</option>
+          <option>Professional Business Management (PBM)</option>
+          <option>International Business Management (IBM)</option>
+        </select>
+        <div class="err">Pilih salah satu prodi dulu ya.</div></div>
+      <div class="f" data-f="transport"><label>Nanti ke kampusnya gimana?</label>
         <div class="opts">
           <label class="opt"><input type="radio" name="transport" value="Datang sendiri"><span>Berangkat sendiri</span></label>
-          <label class="opt"><input type="radio" name="transport" value="Dijemput"><span>Mau dijemput tim Asia</span></label>
+          <label class="opt"><input type="radio" name="transport" value="Dijemput"><span>Mau dijemput tim kami</span></label>
         </div>
         <div class="err">Pilih salah satu dulu ya.</div></div>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -140,7 +152,7 @@ $('retry').onclick = load;
 function normWA(v){ let n = v.replace(/\D/g,''); if (n.startsWith('0')) n = '62' + n.slice(1); return n; }
 const rules = {
   nama:v=>v.trim().length>=3, sekolah:v=>v.trim().length>=3, kota:v=>v.trim().length>=2,
-  kelas:v=>v.trim().length>=1, transport:v=>!!v, wa:v=>/^628\d{7,11}$/.test(normWA(v))
+  kelas:v=>v.trim().length>=1, transport:v=>!!v, prodi:v=>!!v, wa:v=>/^628\d{7,11}$/.test(normWA(v))
 };
 function check(){
   let ok = true;
@@ -157,10 +169,10 @@ form.addEventListener('input', e => { const f = e.target.closest('[data-f]'); if
 form.addEventListener('submit', async e => {
   e.preventDefault();
   const fail = $('fail'); fail.style.display = 'none';
-  if (!check()) { const b = form.querySelector('.bad input'); if (b) b.focus(); return; }
+  if (!check()) { const b = form.querySelector('.bad input,.bad select'); if (b) b.focus(); return; }
   if (form.website.value) return;
   const body = JSON.stringify({ action:'daftar', nama:form.nama.value.trim(), sekolah:form.sekolah.value.trim(),
-    kota:form.kota.value.trim(), kelas:form.kelas.value.trim(), wa:normWA(form.wa.value), transport:form.transport.value });
+    kota:form.kota.value.trim(), kelas:form.kelas.value.trim(), wa:normWA(form.wa.value), transport:form.transport.value, prodi:form.prodi.value });
   const btn = $('btn'); btn.disabled = true; btn.textContent = 'Mengirim...';
   try {
     const r = await (await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body })).json();
